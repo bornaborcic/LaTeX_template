@@ -1,0 +1,744 @@
+\documentclass[11pt]{article}
+\usepackage[serbian,croatian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm,bottom=2cm, left=2.5cm, right=2cm]{geometry}
+\usepackage{amsmath, amssymb, graphicx, float}
+\parindent 0.5cm
+\usepackage{pgf-pie}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+\addbibresource{bibliography.bib}
+\usepackage{siunitx} %potrebno za popis oznaka i vel.
+\usepackage{transparent} %potreban mi je bio za Inkscape import s latex anotacijama
+\setlength{\jot}{10pt}%razmak između multiple jednadžbi u gather okruženju
+\usepackage{subcaption}%za multi figure stranicu tamo pred kraj
+\usepackage{booktabs, tabularx}
+\usepackage{wrapfig}%image wrap na stranu
+
+\PassOptionsToPackage{nolangwarn}{glossaries-extra}%ubije konst. upozorenja od glsr-xtr jer koristim croatian babel
+
+\usepackage[record,% using bib2gls
+ symbols % create list of symbols
+]{glossaries-extra}
+
+% new keys must be defined before \GlsXtrLoadResources    
+\glsaddstoragekey{unit}{}{\glsentryunit}
+
+\GlsXtrLoadResources[
+  src={symbols}, 
+  sort={letter-nocase}, 
+  type=symbols,
+  charset=UTF-8,%garantira bib2gls palatale
+  sort-field={name} %u ovoj ver. radi EN sort -> dovoljno
+]
+
+% Define new glossary style
+
+\newglossarystyle{symbunitlong}{%
+ \setglossarystyle{long3col}% base this style on the list style
+ \renewenvironment{theglossary}{% Change the table type --> 3 columns
+   \begin{longtable}{lp{\glsdescwidth}>{\centering\arraybackslash}p{5cm}}}%
+   {\end{longtable}}%
+ %
+ %\renewcommand*{\glossaryheader}{%  Change the table header
+   %\bfseries Symbol & \bfseries Description & \bfseries Unit\\\hline
+   %\endhead}%
+ \renewcommand*{\glossentry}[2]{%  Change the displayed items
+    \glstarget{##1}{\glossentryname{##1}} %
+    & \glossentrydesc{##1}% Description
+    & \glsentryunit{##1}  \tabularnewline
+ }%
+}
+
+
+\title{Primjena diferencijala s ograničenim proklizavanjem kod osobnih vozila prednjeg pogona}
+\author{Borna Borčić}
+\date{\today}
+
+\numberwithin{equation}{section}%1.1 numbering na jednadžbama ovisan o poglavlju umjesto defaulta
+\begin{document}
+
+\setlength{\abovedisplayskip}{10pt}%razmak iznad i ispod display okruženja (gather npr.)
+\setlength{\belowdisplayskip}{10pt}
+
+\input{naslovna_strana}
+\newpage
+\tableofcontents
+\newpage
+\addcontentsline{toc}{section}{\listfigurename}%dodaje popis slika u sadržaj
+\addcontentsline{toc}{section}{\listtablename}%dodaje popis tablica u sadržaj
+%\addcontentsline{toc}{section}{\listbibliography}%
+\listoffigures
+\listoftables
+\newpage
+%\printunsrtglossary[type=symbols,style=symbunitlong, title=Popis oznaka i kratica]
+\newpage
+\setcounter{table}{0}%potrebno jer broji tablicu na naslovnoj strani
+
+%TODO BibLaTex popraviti format datuma
+
+\section{Osnove primjene diferencijala na završnom prijenosu osobnih vozila}
+	\subsection{Fundamentalna zadaća diferencijala}
+
+\begin{wrapfigure}{r}{0.4\textwidth}
+ \centering
+ \def\svgwidth{6,8cm}
+ \input{ober_dif_2.pdf_tex}
+ \caption{\textit{Shematski prikaz diferencijala sa stožnicima u tipu 2AA} \cite{ober}}
+ \label{fig:oberica}
+\end{wrapfigure} 	
+	 
+Pogonski diferencijal na konvencionalnom osobnom vozilu opremljenom motorom s unutarnjim izgaranjem (nadalje MSUI) nezaobilazan je prijenosni mehanizam koji omogućava sigurnu i pouzdanu dostavu snage motora do pogonskih kotača. Ovim putem dopremljena snaga koristi se za savladavanje relevantnih otpora vožnje. Diferencijal također brine za dodatnu multiplikaciju okretnog momenta narinutog na izlazno vratilo mjenjača te, krucijalno, osigurava mogućnost različite brzine vrtnje između pridruženih mu kotača. Na vozilima s pogonom na svim kotačima takozvani međuosovinski ili središnji diferencijali koriste se i za koordinaciju brzina vrtnje te razdiobu okretnog momenta između prednje i stražnje osovine. U sklopu ovog rada fokus će pak biti pružen osovinskom diferencijalu (nadalje diferencijalu) koji tu zadaću obavlja transverzalno, između lijevog i desnog kotača. Proizvođači prilikom opremanja svojih vozila biraju između konvencionalnih diferencijala sa stožnicima, diferencijala s pužnicima te diferencijala s čelnicima. U sektoru osobnih vozila primat uživa rješenje sa stožnicima, dok su pritom kompaktniji i do 15 \% lakši diferencijali sa čelnicima rezervirani za posebne namjene poput Formule 1.
+
+Središta kontaktne površine guma pri pojedinoj osovini nalaze se na međusobnoj udaljenosti $t$ u $yz$ ravnini u skladu s DIN 70000, to jest ISO 612. Udaljenost $t$ definirana je kao trag kotača \cite{heiring11:chssis}. Prilikom savladavanja zavoja vanjski će kotač u danom vremenu prijeći veći put od onog unutarnjeg jer se nalaze na različitim radijusima zavoja \textit{r} pa pretpostavkom o čistom kotrljanju kotača njihova brzina mora biti različita. Razlika u putu $\Delta s$ kojeg će kotači pridruženi jednoj osovini proći kroz zavoj obuhvatnog kuta $\alpha$ može se opisati sljedećim izrazima:
+%TODO podesit MACRO za \text ili rješit barem auto complete shemu 
+%TODO napraviti da u odlomcima nakon izraza gdje se definiraju varijable mogu jednostavno printati stvari iz vanjskog .biba s popisom veličina	
+\begin{gather}
+r_\text{vanjski}=r+\frac{t}{2}\\
+r_\text{unutarnji}=r-\frac{t}{2}\\
+\Delta s=(r_\text{vanjski}-r_\text{unutarnji})\cdot \alpha
+\end{gather}
+Uvrštavanjem izraza (1) i (2) u izraz (3) naposljetku se dobiva:
+\begin{gather}
+\Delta s=(r+\frac{t}{2}-r+\frac{t}{2})\cdot \alpha=t\cdot \alpha \label{mat:zav}
+\end{gather}
+Pri čemu su:
+\begin{itemize}
+	\item[]$r_\text{vanjski}$ ... radijus zavoja mjeren u točki dodira vanjskog kotača s podlogom
+	\item[]$r_\text{unutarnji}$ ... radijus zavoja mjeren u točki dodira unutarnjeg kotača s podlogom
+\end{itemize}
+
+Iz izraza (\ref{mat:zav}) proizlazi da čim je trag kotača na osovini vozila veći, time je i razlika u njihovim putovima, a samim time i brzinama vrtnje, veća. Zadaća je diferencijala osigurati opisanu razliku u brzini vrtnje pojedinih kotača pridruženih istoj osovini jer bi u suprotnome pri svakom prolasku kroz zavoj kotači bili u značajnom relativnom klizanju na podlogu. Opisano bi dovelo do ubrzane potrošnje guma, kompromitiranja dinamike vozila, ugrožavanja sigurnosti i komfora putnika te povećanih opterećenja po cijeli pogonski sklop vozila.
+
+Prije razmatranja specifičnih tehničkih rješenja valja istaknuti odrednice hipotetskog, idealnog diferencijala s kojima će se naknadno usporediti karakteristike na tržištu dostupnih izvedbi:
+\begin{itemize}
+\item diferencijacija brzine
+\item maksimizacija prianjanja; razdioba okretnog momenta na način da se u potpunosti iskoristi dostupna trakcija
+\item ograničenje momenta; ne dozvoljava da moment na pojedinom kotaču preraste iznos pri kojem se ostvaruje najveća pogonska vučna sila
+\item bez nepovoljnog utjecaja na ponašanje vozila
+\item automatsko, samostalno funkcioniranje
+\item efikasnost
+\item jednostavnost i izdržljivost
+\item dodani trošak mora biti razmjeran povećanju u performansama.
+\end{itemize}
+
+	 \subsection{Otvoreni diferencijal}
+Poznato je kako se prijenosnici općenito dijele na standardne i planetarne. Zupčanici u standardnim prijenosnicima rotiraju isključivo oko svojih vlastitih osi koje su fiksirane u kućištu. Kod planetarnih prijenosnika će pak najmanje jedan element mehanizma izvoditi simultano dva gibanja; rotaciju oko svoje vlastite osi te uz to rotaciju oko neke druge, dislocirane osi. Takvi će se zupčanici nazivati satelitima dok će se zupčanici koji rotiraju samo oko svoje osi zvati sunčanicima. Planetarni prijenosnici kod kojih postoje dva stupnja slobode nazivaju se diferencijali, a upravo je diferencijalni prijenosnik u tipu 2AA najčešće primijenjeno rješenje za prijenos snage kod cestovnih vozila.
+
+Vrijedi napomenuti kako će se izvedba završnog prijenosa na diferencijalu kod automobila s prednjim pogonom razlikovati u odnosu na sliku \ref{fig:oberica}. Shematski se prikaz naime odnosi na konfiguraciju vozila s motorom sprijeda, a pogonom straga gdje je nužno izvršiti zakret osi rotacije za 90°. U slučaju transverzalno smještenog motora i prednjeg pogona, umjesto stožnicima, završni bi prijenos bio ostvaren čelnicima s kosim zubima. Sunčanik 1 povezan je putem poluosovine te dvaju homokinetičkih zglobova s lijevim kotačem, sunčanik 3 pak na isti način s desnim dok držač S rotira zajedno s gonjenim zupčanikom završnog prijenosa, a pritom nosi satelite 2 i 4.
+
+\subsubsection{Osnovna momentna jednadžba otvorenog diferencijala}
+
+\begin{figure}
+ \centering
+ \def\svgwidth{16cm}
+ \input{otvoreni_sile_ispravak.pdf_tex}
+ \caption{\textit{Shematski plan sila i brzina u otvorenom diferencijalu} \cite{2023basiclars}}
+ \label{fig:otvoreni_sile}
+\end{figure} 
+
+Osnovni će se izrazi za otvoreni diferencijal uspostaviti uz pojednostavljenje koje pretpostavlja stožnike s ravnim zubima uz izostanak trenja.
+
+Izlazni moment mjenjača je multipliciran putem završnog prijenosa te zatim u obliku momenta $M_\text{S}$ narinut preko držača S na unutarnje komponente diferencijala. $M_\text{S}$ se razlaže na silu $F_\text{S}$ na radijusu $r_{1/3}$ koji odgovara kinematskom radijusu sunčanika 1 i 3, ili preciznije, udaljenosti njihove točke zahvata sa satelitima do središnje osi rotacije diferencijala. Sili $F_\text{S}$ se opiru sile $F_1$ i $F_3$ koje djeluju na kinematskom obodu satelita.
+%
+\begin{gather}
+M_\text{S}=F_ \text{S}\cdot r_{1/3} \label{prva}
+\end{gather}
+%
+Kako se sateliti nalaze na vlastitim osovinicama oni ne mogu prenijeti zakretni moment te vrijedi:
+%
+\begin{gather}
+	-F_3\cdot r_\text{sat}+F_1\cdot r_\text{sat}=0\\
+	F_1=F_3=\frac{F_\text{S}}{2}
+\end{gather}
+%
+Pritom je vidljivo kako se s obzirom na kinematski radijus sunčanika 1 i 3 momenti na pojedinim kotačima mogu prikazati kao:
+%
+\begin{gather}
+	M_1=F_1\cdot r_{1/3}=\frac{F_\text{S}}{2}\cdot r_{1/3} \label{jedna} \\
+	M_3=F_3\cdot r_{1/3}=\frac{F_\text{S}}{2}\cdot r_{1/3} \label{druga}
+\end{gather}
+%
+Gdje su:
+\begin{itemize}
+	\item[]$F_1$ ... tangencijalna pogonska sila sunčanika 1
+	\item[]$F_3$ ... tangencijalna pogonska sila sunčanika 3
+	\item[]$r_\text{sat}$ ... kinematski radijus satelita
+	\item[]$M_1$ ... moment narinut na lijevi kotač
+	\item[]$M_3$ ... moment narinut na desni kotač
+\end{itemize}
+%
+Naposljetku iz izraza \ref{prva}, \ref{jedna} i \ref{druga} proizlazi osnovna momenta jednadžba otvorenog diferencijala koja nalaže kako se dovedeni moment uvijek jednako dijeli između oba kotača, a glasi:
+\begin{gather}
+	M_1=M_3=\frac{M_\text{S}}{2}
+\end{gather}
+
+Do istog se zaključka moglo doći i drugačijim putem. Kada bi se držač S zaključao, to jest kada bi mu se zakretanje onemogućilo, mogao bi se izračunati prijenosni omjer $i_{1/3}$ između dvaju sunčanika diferencijala kao \cite{genta2008automotive}:
+%
+\begin{gather}
+i_{1/3}=\frac{\omega_1-\omega_\text{S}}{\omega_3-\omega_\text{S}} \label{izraz_i}
+\end{gather}
+%
+Pritom za konkretan slučaj ovakvog diferencijala sa stožnicima vrijedi kako je $i=-1$ \cite{genta2008automotive}. Kada se uvrsti $\omega_\text{S}=0$ dobije se:
+\begin{gather}
+-1=\frac{\omega_1}{\omega_3}\\
+-\omega_3=\omega_1 \label{nez}
+\end{gather}
+%
+Prethodni izraz upućuje na to da kada bi se s ugašenim motorom i vozilom u brzini, podignutim na dizalici, jedan od kotača zakrenuo, drugi bi se zakrenuo jednako toliko, ali u drugom smjeru. Opisano ponašanje je iskustveno provjereno, a i sukladno je pregledu na slici \ref{fig:otvoreni_sile}. Kako trenje u ovom modelu nije prisutno postavlja se izraz:
+%
+\begin{gather}
+M_1\cdot \omega_1+M_3\cdot \omega_3=M_\text{S}\cdot \omega_\text{S}
+\end{gather}
+Gdje ako uvrstimo raniji izraz \ref{izraz_i} koji iscrtava odnos između brzina zupčanika naposljetku dobivamo:
+\begin{gather}
+M_1=-M_\text{S}\cdot \frac{i}{1-i}\\
+M_3=M_\text{S}\cdot \frac{1}{1-i}\\
+\frac{M_1}{M_3}=-i=1
+\end{gather}
+Zaključuje se kako u slučaju idealnog otvorenog diferencijala pojedini kotači zaista uvijek dobivaju jednak iznos okretnog momenta i to jednak polovici momenta na nosaču satelita S spojenim na završni prijenos.
+
+\subsubsection{Osnovna kinematska jednadžba otvorenog diferencijala}
+
+Za pretpostavljen smjer vrtnje $\omega_\text{sat}$ prema planu sila i brzina iskazanom na slici \ref{fig:otvoreni_sile} za satelit i sunčanike vrijedi:
+%
+\begin{gather}
+v_\text{S}=\omega_\text{S}\cdot r_{1/3}=\frac{v_1+v_3}{2}\\
+v_3=v_\text{S}-\omega_\text{sat}\cdot r_\text{sat}\\
+v_1=v_\text{S}+\omega_\text{sat}\cdot r_\text{sat}
+\end{gather} 
+%
+Kombinacijom izraza slijedi:
+\begin{gather}
+\omega_\text{S}=\frac{\omega_1+
+ \omega_3}{2} \label{kinjeddif}
+\end{gather}
+
+Vidljivo je kako će brzina vrtnje držača S $\omega_\text{S}$ uvijek biti aritmetička sredina brzina vrtnje kotača $\omega_1$ i $\omega_3$. Time je opisana osnovna kinematska jednadžba otvorenog diferencijala, a dodatno se može promotriti i kako je izraz sukladan ranijem dokazu iz jednadžbe \ref{nez} gdje se uspostavilo da kada je nosač zaustavljen, kotači vrte u suprotnim smjerovima:
+%
+\begin{gather}
+0=\frac{\omega_1+
+ \omega_3}{2}\\
+ -\omega_1=\omega_3
+\end{gather}
+%
+S druge pak strane, kada bi vozilo putovalo pravocrtno, brzina oba kotača bila bi jednaka nekoj brzini $\omega$. S tom pretpostavkom izraz %TODO$
+dobiva novi oblik:
+\begin{gather}
+\omega_\text{S}=\frac{\omega+
+ \omega}{2}\\
+ \omega_\text{S}=\omega
+\end{gather}
+Iz čega je jasno kako se u tom scenariju držač S vrti sinkrono sa sunčanicima 1 i 3 dok pritom sateliti 2 i 4 miruju. Ako se pak brzina vanjskog kotača poveća za određeni iznos $\Delta \omega$ tada će se brzina unutarnjeg kotača morati za jednak iznos smanjiti kako bi desna strana izraza ostala nepromijenjena, odnosno jednaka lijevoj strani:
+\begin{gather}
+\omega_\text{S}=\frac{(\omega_1+\Delta \omega)+(\omega_3-\Delta \omega)}{2}
+\end{gather}
+Kompenzacija $\Delta \omega$ ostvarena je putem satelita 2 i 4 koji, nošeni na držaču S, rotiraju dodatno oko svoje osi. Obodna brzina sunčanika vanjskog kotača uvećana je za obodnu brzinu satelita dok je pritom brzina sunčanika vezanog za unutarnji kotač za isti iznos smanjena.
+
+\subsubsection{Kvalitativan opis ponašanja otvorenog diferencijala}
+
+Jasno je kako će se za idealni otvoreni diferencijal moment dopremljen do diferencijala uvijek ravnomjerno podijeliti između lijevog i desnog kotača. Unutar tablice \ref{tab1} iskazani su pozitivni i negativni aspekti takvog rješenja. U slučaju realnog sklopa situacija je ipak nešto drugačija i zbog unutarnjeg trenja može doći do razlike između pogonskih momenata na pridruženim mu kotačima. Ovakva se karakteristika diferencijala izražava kočnim brojem $S$ koji je dobiven kao količnik razlike momenata na kotačima i njihove sume:
+\begin{gather}
+S=\frac{M_1-M_3}{M_1+M_3}\cdot 100\%
+\end{gather}
+Kod spomenutog realnog otvorenog diferencijala kočni broj $S$ može dosegnuti do 15 \%, a kotač koji se sporije okreće je bez iznimke onaj na koji će veći zakretni moment biti narinut \cite{milliken1995race}.
+
+\begin{table}[ht]%hear, top, bottom page, nasuprot [h]
+\begin{tabularx}{\linewidth}{>{\parskip1ex}X@{\kern4\tabcolsep}>{\parskip1ex}X}
+\toprule
+\hfil\bfseries Prednosti
+&
+\hfil\bfseries Nedostaci
+\\\cmidrule(r{3\tabcolsep}){1-1}\cmidrule(l{-\tabcolsep}){2-2}
+
+%% PROS, seperated by empty line or \par
+Simetričnost okretnog momenta isporučena na kotače osigurava jednakost pogonskih vučnih sila u dodirnoj površini gume s podlogom pa je utjecaj pogonske sile na upravljanje minimalan.\par
+Vozač neovisno o disparitetu u kvaliteti podloge između lijevog i desnog kotača ne mora voditi računa o gubitku direkcijske stabilnosti.\par
+
+
+&
+
+%% CONS, seperated by empty line or \par
+Okretni moment koji diferencijal može narinuti na podlogu ograničen je onim okretnim momentom koji kotač sa najslabijim prianjanjem može prenijeti. U slučaju da se jedan kotač nalazi na ledu, a drugi na suhoj asfaltnoj podlozi ($\mu$-\textit{split} situacija), diferencijal će na oba kotača isporučiti moment koji kotač na ledu može akomodirati što dovodi do manje no optimalnog iskorištenja dostupnih zaliha prianjanja.
+
+\\\bottomrule
+\end{tabularx}
+\caption{\textit{Prednosti i mane primjene otvorenog diferencijala}}
+\label{tab1}
+\end{table} 
+
+\subsection{Osnovne dinamičke karakteristike vozila s prednjim pogonom}
+Prednji pogon uz motor smješten sprijeda i poprečno predstavlja temeljnu pogonsku arhitekturu M1 osobnog vozila. Iako prisutan od samog početka razvoja automobila, na svoju je proliferaciju morao pričekati do pojave Tractinog homokinetičkog zgloba $1931.$ godine. Do tada primijenjivan dvostruki Hookeov zglob pokazao se dostatno dobrim rješenjem za stražnju pogonsku osovinu, no dodatni zahtjevi za artikulacijom prednjih kotača rezultirali su, uslijed asinkrone vrtnje, ozbiljnim narušavanjem kakvoće osjećaja u upravljaču, pogotovo pri većim kutovima zakreta.
+
+Aduti ovakvog pogonskog postava su mnogi, no najvažnije je istaknuti kako prednosti koje nose alternativne, projektno i proizvodno skuplje solucije, nisu tržišno prepoznate sa strane potrošača. Iznimka su tek nekolicina specifičnih prodajnih sektora skromnog udjela u ukupnom broju prodanih vozila. Transverzalna ugradnja motora i pogona sprijeda ističe se sljedećim kvalitetama:
+\begin{itemize}
+\item nudi bolju prostornu iskoristivost od ostalih rješenja zbog plitke ugradnje motora i pogona te izostanka kardanskog vratila
+\item smanjene su zagonske mase u pogonu te ukupna masa za ekvivalentno vozilo.
+\item platformizacija je uvelike olakšana gdje se diferencijacijama u međuosovinskom razmaku stvara prostor za široku gamu modela, dok fundamentalna konstrukcijska rješenja u vidu postava prednje i stražnje osovine ostaju nepromijenjena
+\item agregat i mjenjač smješteni nad prednjom pogonskom osovinom osiguravaju dobar kapacitet prianjanja pri niskim iznosima longitudinalnog ubrzanja što je posebice od koristi u otežalim uvjetima vožnje uslijed kiše i snijega
+\item ponašanje vozila s prednjim pogonom smatra se intuitivnijim i sigurnijim za prosječnog vozača jer će vozilo na dodavanje prekomjerne pogonske vučne sile kroz zavoj reagirati podupravljanjem daleko češće no što je to slučaj s vozilima stražnjeg pogona.
+\end{itemize}
+Kao uostalom i svako konstrukcijsko rješenje, uz pojedine prednosti također podrazumijeva i pokoju manu, a za ovaj su rad posebice relevantne sljedeće:
+\begin{itemize}
+\item s porastom ubrzanja, uslijed prijenosa težine s prednje na stražnju osovinu, kapacitet prianjanja na pogonskim kotačima kopni
+\item utjecaj pogonske vučne sile na prednje kotače ima potencijal kompromitirati osjećaj u upravljaču što vozaču može otežati suvereno upravljanje automobilom
+\item diferencijal je zbog oskudnog prostora smješten u zajedničkom kućištu s mjenjačem s kojim posljedično dijeli i ulje koje ne mora nužno predstavljati idealno rješenje za oba sklopa; za primjer, GL-5 klasa transmisijskog ulja zbog visoke količine EP aditiva (\textit{extreme pressure additive}) dovodi do ubrzane potrošnje mjedenih komponenti poput sinkrona.
+\end{itemize}
+
+\begin{figure}
+ \centering
+ \def\svgwidth{14cm}
+ \input{prednji_pogon.pdf_tex}
+ \caption{\textit{Plan sila vozila tokom akceleracije}}
+ \label{fig:pogon}
+\end{figure} 
+
+Na slici \ref{fig:pogon} prikazano je jednoliko ubrzavanje automobila s prednjim pogonom. Automobil je promatran u okviru neinercijalnog koordinatnog sustava kako bi se dinamički problem mogao interpretirati primjenom jednadžbi statičke ravnoteže. Sile otpora zraka i kotrljanja su zanemarene. Momentnim računom oko kontaktne točke stražnje osovine B dobiva se izraz iz kojeg je moguće izraziti veličinu $F_\text{VF}$ koja opisuje agregat normalne sile u dodirnim točkama prednje osovine:
+\begin{gather}
+\Sigma M_\text{B}=0\\
+-F_\text{VF}\cdot L+F_\text{G}\cdot (L-r)-F_\text{D'Alambert}\cdot h_\text{cg}=0\\
+F_\text{VF}=\frac{F_\text{G}\cdot (L-r)-F_\text{D'Alambert}\cdot h_\text{cg}}{L} \label{četiri}
+\end{gather}
+Gdje su:
+\begin{itemize}
+	\item[]$L$ ... međuosovinski razmak vozila
+	\item[]$F_\text{G}$ ... težina vozila
+	\item[]$r$ ... udaljenost između težišta vozila i točke B
+	\item[]$F_\text{D'Alambert}$ ... D'Alambertova sila inercije koja djeluje u težištu
+	\item[]$h_\text{cg}$ ... visina težišta vozila od tla
+\end{itemize}
+Promatranjem izraza (\ref{četiri}) vidljivo je da za ekvivalentnu težinu, međuosovinski razmak i poziciju težišta, normalna sila na prednjoj pogonskoj osovini pada s porastom inercijske sile $F_\text{D'Alambert}$ koja je jednaka umnošku akceleracije $a$ i mase vozila. Kako maksimalna vučna sila ovisi o normalnoj sili na pogonskim kotačima, opisani su izrazi sukladni ranijoj tvrdnji o smanjenju kapaciteta prianjanja vozila prilikom ubrzavanja.
+
+Uzevši u obzir karakteristične nedostatke prednjeg pogona i ranije iscrtan način na koji otvoreni diferencijal raspoređuje okretni moment, jasno je da kombinacija ovih dvaju tehničkih rješenja neće biti prvi izbor u slučaju da su krajnje performanse vozila cilj kojim se vodi. Ipak, proizvođači u novije vrijeme usku tržišnu nišu kupaca entuzijasta nude upravo športskim izvedenicama regularnih kompaktnih automobila koji su, u svojem baznom obliku, okarakterizirani prednjim pogonom te primjenom otvorenog diferencijala. Razlog tomu su redom; sve stroži regulatorni okvir vezan za flotne emisije CO\textsubscript{2}, rastuće cijene goriva te velik pritisak prema koherentnoj platformizaciji prodajne game s ciljem povećanja dobiti zbog čega samostalni športski modeli sve rjeđe sazrijevaju dalje od konceptne faze.
+
+Jednako kao što se prednja osovina rasterećuje kroz longitudinalno ubrzanje tako se i unutarnji kotač rasterećuje uslijed centripetalnog ubrzanja koje se pojavljuje tokom savladavanja zavoja. Otvoreni će diferencijal u takvoj situaciji i dalje isporučivati na svaki od kotača jednak zakretni moment, usprkos tomu što je vanjski kotač sposoban na podlogu prenijeti pogonsku silu u grubo veću za sam iznos lateralnog prijenosa težine. Rješenje koje se samo po sebi nalaže je primjena diferencijala koji bi mogao, povrh svih svojih fundamentalnih zadaća, asimetrično prenositi moment između pridruženih mu kotača kako bi se dostupne zalihe prianjanja maksimalno eksploatirale. Takvo rješenje naziva se samokočni diferencijal, a prije no što se pobliže opišu njegove glavne izvedenice uputno je istaknuti parametre ovjesa i upravljanja koji vozilo mogu učiniti više ili manje prikladnim za ugradnju ovakvog sustava.
+
+\subsection{Relevantni parametri ovjesa i upravljanja}
+
+Kako je već istaknuto, krucijalno je smanjiti razvojni trošak i proizvodnu cijenu športskog automobila te se stoga za polazišnu točku odabiru konvencionalni automobili B i C segmenta kakvima gravitiraju regularni kupci i koji su univerzalno opremljeni \textit{MacPherson} ovjesom. Prednosti MacPherson ovjesa uključuju:
+\begin{itemize}
+\item smanjeni broj komponenti ovjesa osigurava uštedu, a sklapanje u proizvodnom pogonu je, relativno na druga konstrukcijska rješenja, pojednostavljeno jer je prednji ovjes, izuzev kapa amortizera, u cijelosti vezan za podokvir te se vrlo lako ugrađuje u karoseriju
+\item uspravan položaj sklopa opruge i amortizera osigurava pregršt prostora za poprečnu ugradnju MSUI-a
+\item donja vodilica ovjesa djeluje na oprugu na manjem kraku no što je to slučaj kod rješenja s dvostrukim ramenima što omogućava, za ekvivalentan ciljani \textit{wheel rate}, ugradnju lakše opruge niže karakteristike krutosti.
+\end{itemize}
+
+Primjena samokočnog diferencijala će, posljedično na razliku u narinutim zakretnim momentima na kotače, dovesti i do razlike u pogonskim vučnim silama koje djeluju u dodirnim točkama guma. Za idealni otvoreni diferencijal vučne su sile jednake pa se samim time i momenti koje one stvaraju oko osi zakretanja svakog pojedinog kotača anuliraju u letvi volana nakon razlaganja u sile preko krajnika i spona volana. Kod samokočnog diferencijala to više neće biti slučaj, a razlika u momentima oko osi zakretanja kotača manifestirati će se kao disturbacijski okretni moment u upravljaču, to jest \textit{torque steer}.
+
+Kako bi se ova nepovoljna pojava reducirala uputno je os zakretanja kotača, odnosno \textit{kingpin inclination axis} (nadalje KPI), smjestiti na čim manjem kraku od središnje osi simetrije kotača unutar koje djeluju pogonske sile. \textit{MacPherson} koncepcija ovjesa ovdje kaska za sustavom s dvostrukim ramenima, no počevši s Renaultom 2003. godine proizvođači su posebnim rješenjima doskočili spomenutom nedostatku. Riječ je o konstrukciji gdje se rukavac kotača razlaže na 2 zasebna elementa; okvir rukavca koji se veže na donje rame i sklop amortizera te sam rukavac koji rotira unutar uležištenja u okviru te nosi glavčinu kotača. Na ovaj se način, uz zadržavanje svih postojećih prihvatnih točaka na podokviru i karoseriji, omogućava značajno smanjenje \textit{torque steera} putem skraćivanja disturbacijskog kraka na kojem pogonska sila djeluje oko KPI-a. Renaultovo rješenje nazvano je \textit{PerfoHub}, Fordovo \textit{RevoKnuckle}, GM-ovo \textit{HyperStrut}, a Hondino pak \textit{Double Axis}. Drugi su se proizvođači nastojali opirati utjecaju \textit{torque steeera} i kroz posebno upravljanje elektroservo uređajem u slučaju Mini Coopera S i JCW te Forda Focusa ST, ali uz tek ograničen uspjeh.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{14cm}
+ \input{dual_axos.pdf_tex}
+ \caption{\textit{Hondin Dual Axis sustav prednjeg ovjesa} \cite{Honda}}
+ \label{fig:dual}
+\end{figure} 
+
+%\begin{figure}
+%\centering
+
+%%\begin{tikzpicture}
+%%	\pie[text=legend]{17/Stražnji pogon, 7/Pogon na sve kotače, 76/Prednji pogon}
+%%\end{tikzpicture}
+%%\caption{Tržišni udio pojedinih pogonskih arhitektura kod osobnih vozila}
+%%\end{figure}
+ 
+%TODO na svjetskom tržištu?
+\newpage
+\section{Tehnička rješenja diferencijala s ograničenjem proklizavanja}
+	\subsection{Torsen diferencijal}
+
+\begin{wrapfigure}{r}{0.4\textwidth}
+\centering
+    \includegraphics[width=0.35\textwidth]{torsen_B.png}
+    \caption{\textit{Izometrijski presjek Torsen T-2 ili Tip B diferencijala} \cite{2023basiclars}}
+    \label{fig:torsen_B}
+\end{wrapfigure}
+
+Naziv Torsen proizlazi iz engleske sintagme \textit{torque sensing} koja jezgrovito iscrtava način funkcioniranja ovog diferencijala jer mu je samokočni moment proporcionalan na kućište narinutom zakretnom momentu. Torsen je osmislio, a $1958.$ i patentirao, američki inovator i inženjer strojarstva Vernon Gleasman \cite{popsci}. Prilikom finalizacije konstrukcije diferencijala ušao je u partnerstvo s kompanijom \textit{The Gleason Works}, vodećim stručnjacima za ozubljenje diferencijala koji su svojedobno proizvodili 90\% od ukupne količine diferencijalnih stožnika potrebne autoindustriji na svjetskoj razini. U međuvremenu je \textit{The Gleason Works} prošao kroz seriju akvizicija te je danas dio \textit{JTEKT} korporacije koja tim putem uživa pravo na upotrebu registriranog žiga Torsen. Usprkos tomu, postoji nekolicina poduzeća koja nude samokočne diferencijale konstrukcijski gotovo istovjetne Torsenu T-2; na europskom tržištu ponajprije je riječ o \textit{Quaifeu} i \textit{Wavetracku}. Kroz ostatak rada će se skupni naziv Torsen koristiti za sve mehaničke samokočne diferencijale koji potrebne sile trenja bude kroz interakciju zupčanika i to bez primjene lamela.
+\par %hbox fullness se javljao pa sam random stavio ovo, ne znam kaj se događa lel
+Prema slici \ref{fig:torsen} Torsen diferencijal u mnogočemu je sličan otvorenom diferencijalu. Ulogu stožnih sunčanika 1 i 3 sada odigravaju pužni sunčanici dok su satelite čelnike zamijenili pužni sateliti smješteni po obodu sunčanika u međusobnom kutnom razmaku od $120^\circ$. Važno je istaknuti kako su pužni sateliti uzubljeni isključivo s pripadajućim im pužnim sunčanikom, dok su sa susjednim satelitom povezani preko aksijalno im pridruženih čelnika, to jest čelnika satelita. Na sučelju između čeonih površina pužnih planeta te između planeta i kućišta ugrađuju se potisne podloške (\textit{thrust washers}) koje, uz nagib kosog ozubljenja, određuju karakteristike Torsen diferencijala (poput kočnog broja $S$).
+
+Za prijenosni omjer ovakvog planetarnog prijenosnika ponovno vrijedi $i=-1$. U slučaju da se kućište zakoči, rotacija jednog kotača će, jednako kao i za otvoreni diferencijal, dovesti do istovjetne rotacije drugog kotača, ali u suprotnome smjeru. Diferenciranje između brzina vrtnje kotača kroz zavoj ostvaruje se vrtnjom satelita koji se zbog činjenice da su povezani čelnicima vrte jednakom brzinom u oprečnim smjerovima. Stoga ponovno vrijedi da će sunčanik vanjskog kotača biti ubrzan točno za iznos za koji će sunčanik unutarnjeg biti usporen.
+
+\textit{Torque bias ratio}, odnosno omjer na kotače narinutih zakretnih momenata \textit{TBR} za T-1 Torsen kreće se u rasponu između 2,5:1 i 4,5:1. \textit{TBR} je definiran kao omjer između momenta na kotaču s više prianjanja $M_1$ i onog na kotaču s manje prianjanja $M_2$ prema izrazu:
+\begin{gather}
+TBR=\frac{M_1}{M_3}
+\end{gather}
+Putem kočnog broja $S$ i omjera na kotače narinutih momenata $TBR$ opisujemo ponašanje pojedinih samokočnih diferencijala. I $TBR$ i kočni broj $S$ opisuju istu karakteristiku diferencijala te je putem jednog moguće izraziti drugi, i obrnuto:
+%
+\begin{gather}
+S=\frac{M_1-M_3}{M_1+M_3}=\frac{M_3\left(\frac{M_1}{M_3}-1\right)}{M_3\left(\frac{M_1}{M_3}+1\right)}=\frac{TBR-1}{TBR+1}\\
+TBR=\frac{S+1}{1-S}
+\end{gather}
+%
+\begin{wrapfigure}{r}{0.4\textwidth}
+ \centering
+ \def\svgwidth{5cm}
+ \input{wave.pdf_tex}
+ \caption{\textit{Shema Wavetrac samokočnog diferencijala} \cite{RRT}}
+ \label{fig:wave}
+\end{wrapfigure} 
+%
+Izlazni okretni moment iz mjenjača dostavljen je do Torsen diferencijala putem stožnika povezanog za njegovo kućište koje također nosi osovinice pužnih satelita. Odabirom različitih površina na koje elementi diferencijala naliježu, te onih na kojima se uz prisutnost trenja odvija njihovo relativno klizanje, moguće je postići različite vrijednosti kočnog faktora $S$ ovisno o tome ubrzava li vozilo ili pak koči motorom. U trenutku kada se preko stožnika završnog prijenosa narine zakretni moment na diferencijal, na sučeljima između satelita i pripadajućih sunčanika uz efektivne tangencijalne sile koje prenose koristan rad također će se javljati aksijalne reakcijske sile zbog nagiba u boku zuba. Povećanjem okretnog momenta povećavati će se i reakcijske sile koje zatim dovode do nalijeganja lijevog sunčanika na kućište diferencijala te nalijeganja čeone površine desnog sunčanika na čeonu površinu lijevog. Pritom dolazi do trenja kočenja na sunčaniku kotača koji se rotira većom brzinom, a taj se moment ponovno putem diferencijala dijeli između dvaju kotača. Efektivno dakle, riječ je o redukciji zakretnog momenta na kotaču koji se vrti brže u korist kotača koji se vrti sporije. U slučaju kočenja motorom narinuti je zakretni moment na diferencijal drugog smjera pa se sunčanici ovaj puta kreću prema drugoj strani kućišta diferencijala. Kako su aktivne tarne površine različite ovisno o smjeru narinutog okretnog momenta tako se i rasporedom pojedinih tipova podloški može postići odstupanje u karakteristici diferencijala između ubrzavanja i kočenja motorom.
+
+Ponašanje Torsen diferencijala može se iskazati kroz nekolicinu diskretnih faza prilikom savladavanja zavoja konstantnog radijusa uz postepeno povećavanje pogonskog momenta na kotačima. $\Delta \delta$ kao razlika između konkretnog kuta zakreta upravljača te onog za dani zavoj definiranog Ackermannovim upravljanjem koristiti će se kao indikator ponašanja vozila.
+
+\begin{enumerate}
+\item U početku se vozilo kreće konstantnom brzinom uz skromnu vučnu silu dovoljnu tek za savladavanje cestovnih opterećenja. Vanjski se kotač okreće većom brzinom od unutarnjeg pa se prijenos zakretnog momenta odvija na način da povećava pogonsku silu na unutarnjem kotaču, a smanjuje onu na vanjskom. Riječ je o \textit{yaw} momentu, odnosno momentu oko vertikalne osi vozila, koji teži podupravljanju. $\Delta \delta$ je veći no za slučaj idealnog otvorenog diferencijala.
+\item Povećanjem pogonske sile vozilo ubrzava pa se longitudinalni i lateralni prijenos težine intenzivira. Narinuti pogonski moment na unutarnjem kotaču raste simultano sa redukcijom u kapacitetu prianjanja pripadajuće gume. Unutarnji kotač naposljetku počinje rotirati s povećanim faktorom klizanja te u brzini dostiže vanjski kotač. U ovom trenutku kavez diferencijala rotira zajedno sa sunčanicima, sateliti miruju, a zakretni je moment između kotača u ravnoteži. $\Delta \delta$ je jednak onome kod idealnog otvorenog diferencijala.
+\item Brzina rotacije unutarnjeg kotača uz povećanje pritiska na papučici gasa nastavlja sa svojim rastom te nadmašuje brzinu vrtnje vanjskog kotača. Tek u ovom trenutku Torsen isporučuje veći zakretni moment na vanjski kotač te počinje inducirati preupravljajući \textit{yaw} moment. $\Delta \delta$ je sada manji no za slučaj primjene idealnog otvorenog diferencijala, a samokočni je moment nastao trenjem klizanja. Unutarnji kotač će nedugo potom djelovanjem samokočnog momenta usporiti do brzine približne vanjskom. Uz dovoljan samokočni moment postiže se sinkrona vrtnja kaveza diferencijala sa sunčanicima, uz očuvanje tendencije gibanja gdje unutarnji sunčanik prestiže onaj vanjski. Samokočni je moment nastao statičnim trenjem te i dalje djeluje u korist vanjskog kotača.
+\item Daljnjim povećavanje pogonskog momenta moguća su dva scenarija; ukoliko gume prianjanju dovoljnim intenzitetom omjer momenata između kotača će naposljetku dosegnuti \textit{TBR}, a diferencijal će napokon popustiti. Unutarnji kotač rotira ponovno brže od vanjskog, djeluje trenje klizanja, ali $TBR$ je i dalje postojan te u svojoj vršnoj vrijednosti. Ako pak podloga nije adekvatna, vanjski će kotač prebaciti tjeme funkcije koja povezuje faktor klizanja kotača sa faktorom trenja $\mu$ te će vozilo naglo izgubiti kapacitet za izdržavanje lateralnog ubrzanja i pritom počet snažno podupravljati.
+\end{enumerate}
+%
+Opisani koraci pod rednim brojem 1 i 2 analogni su dinamici iskazanoj na slici \ref{fig:carlo} koja demonstrira ponašanje vozila opremljenog lamelni špernim diferencijalom sa fiksnim iznosom predopterećenja.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{9cm}
+ \input{torsen.pdf_tex}
+ \caption{\textit{Izometrijski presjek Torsen T-1 ili Tip A diferencijala} \cite{genta2008automotive}}
+ \label{fig:torsen}
+\end{figure} 
+
+Vršni je \textit{TBR} kod Torsena konstantan neovisno o iznosu narinutog momenta na diferencijal, a njegova stvarna vrijednost, shodno uvjetima na cesti, neprestano fluktuira između one vršne i one svojstvene otvorenom diferencijalu (1:1). Samokočni moment pak linearno raste povećanjem momenta $M_\text{S}$. Opisano je lako promotriti na slici \ref{fig7:a} koja prikazuje ponašanje jednostavnog lamelnog diferencijala, u svojoj funkciji sličnog Torsenu. Diferencijal može zauzeti bilo koju radnu točku koja se nalazi unutar masno otisnutih crnih linija, a za svaku točku se lako može očitati zakretni moment na pojedinim kotačima. 
+
+Kasnija evolucija Torsen T-2 prikazana je na slici \ref{fig:torsen_B}. U pogledu diferenciranja brzine funkcionira na način jednak tipu A uz promjenu gdje su osi rotacije satelita sada paralelne s osi rotacije sunčanika. Sateliti su smješteni u posebne džepove u sklopu kućišta diferencijala o koje se taru tokom djelovanja zakretnog momenta što dovodi do samokočnosti. Spomenuti džepovi predstavljaju dodatno frikcijsko sučelje povrh čeonih površina sunčanika i kućišta koje su relevantne kao i u kontekstu tipa A. $TBR$ prozor za ovu Torsen arhitekturu je skromniji te se kreće od 1,8:1 pa do 3,3:1, no zato nudi uštedu u pogledu vanjskih dimenzija te rad uz bolja NVH (\textit{noise vibrations harshness}) svojstva. Upravo je T-2 Torsen najpopularnija ugradnja na športskim automobilima s prednjim pogonom u proteklih dvadesetak godina. Davne $1995.$ godine na europskom se tržištu pojavila Honda Integra Type R opremljena upravo T-2 Torsenom dok se danas prodaju posljednji modeli Renault Megane RS-a uz identičnu koncepciju samokočnog diferencijala. T-2 diferencijali nisu osjetljivi na tip ulja koji se primjenjuje dok stariji T-1 zahtijevaju GL-5 transmisijsko ulje.
+
+Torsen diferencijal neće moći postići samokočnost u trenucima kada je jedan od pogonskih kotača u zraku jer je zakretni moment koji je tada moguće prenijeti premalen da bi osigurao dovoljnu kontaktnu silu na tarnim površinama diferencijala. Ovaj je hendikep anuliran dolaskom T-2R izvedenice koja je dodatno opremljena i predopterećujućom oprugom. Alternativa T-2R-u nudi se u obliku Wavetrac diferencijala prikazanog na slici \ref{fig:wave} koji posjeduju dodatan mehanizam u obliku prstena s brijegovima između dvaju sunčanika. Kada se javi velika razlika u njihovim brzinama, prsten (na slici u zelenom) će se uspeti preko brijegova, pritom se aksijalno pomaknuti te inducirati prijenos zakretnog momenta s jedne na drugu poluosovinu i to putem njenog vlastitog frikcijskog prstena (u sivome).
+
+Benefite ugradnje Torsen diferencijala moguće je lako istaknuti ispitivanjem vožnje kružnicom u otvorenoj petlji kako je prikazano na lijevom dijagramu slike \ref{fig:huch}. Ranije je spomenuto kako vozila s prednjim pogonom teže podupravljanju prilikom ubrzavanja kroz zavoj jer se potrebna pogonska vučna sila mora namiriti iz istih zaliha trakcije prednjih pneumatika kao i bočna sila prianjanja. Vizualizacijom kruga trenja jasno je da povećanjem longitudinalnog ubrzanja, lateralno ubrzanje mora kopniti. Kod vožnje ispitnom kružnicom relativni je kut zakreta vozila oko njegove vertikalne osi $\psi_\text{rel}$ moguće iskazati kao integral razlike izmjerene brzine zakretanja vozila $\psi'$ te njene referentne vrijednosti za dani zavoj $\psi'_\text{ref}$ \cite{huchtkotter1996LSD}:
+%
+\begin{gather}
+\psi_\text{rel}=\int (\psi'- \psi'_\text{ref})\,\mathrm{d}t
+\label{izrazic}
+\end{gather}
+%
+Pritom referentna brzina zakretanja vozila oko svoje vertikalne osi $\psi'_\text{ref}$ proizlazi iz njegove trenutne tangencijalne brzine $v$ i radijusa zavoja $r$ koji je konstantan:
+%
+\begin{gather}
+\psi'_\text{ref}=\frac{v}{r}
+\end{gather}
+
+U ispitnom slučaju sa slike \ref{fig:huch} vozilo u trenutku $t=0$ kreće s ubrzavanjem. Za slučaj gdje vrijedi $\psi_\text{rel}=0$ vozilo bi se ispitnom kružnicom kretalo neutralno, odnosno njegova bi se uzdužna os $x$ u svakom trenutku preklapala s tangentom na ispitnu kružnicu. Za vrijednosti $\psi_\text{rel}<0$ jasno je kako se tangencijalna brzina povećala, posljedično i odgovarajuća referentna brzina zakretanja $\psi'_\text{ref}$ raste, no izmjerena brzina zakretanja $\psi'$ kaska te vozilo širi svoju putanju. Evidentno je kako Torsen diferencijal kroz povoljnu preraspodjelu zakretnog momenta između kotača stvara moment oko vozila s tendencijom prema preupravljanju što osigurava skromniji porast u relativnom kutu zakretanja $\psi_\text{rel}$.
+
+Desni pak dijagram na slici \ref{fig:huch} demonstrira slučaj kočenja motorom na identičnoj ispitnoj kružnici. Vozilo je pogonjeno tek tolikim intenzitetom kako bi se stacionarna brzina kruženja očuvala sve do trenutka $t=0$ kada pritisak na papučicu gasa jenjava, a nastupa kočenje motorom. U ovoj situaciji sunčanici naliježu na drugu stranu kućišta diferencijala, ali samokočni moment trenja ponovno djeluje na isti način. Kotač s većom brzinom vrtnje, vanjski, usporavan je na uštrb unutarnjeg. Zakretni je moment motornog kočenja dakle distribuiran u korist vanjskog kotača što dovodi do stabilizirajućeg momenta oko težišta vozila. Opisani se moment opire tendenciji vozila prema preupravljanju što je primjetno iz činjenice da je vrijednost relativnog kuta zakreta $\psi_\text{rel}$ za otvoreni diferencijal u svakom trenutku veća od one za Torsen.
+
+Za slučaj kočenja kroz zavoj, kako zagonski moment usporavanog motora djeluje u istom smjeru kao i pogonski, Torsen će (kao i sva ostala rješenja samokočnih diferencijala) smanjivati kočionu silu na unutarnjem kotaču, a povećavati onu na vanjskom. Ovakva je slika povoljna jer smanjuje tendenciju blokiranju rasterećenog unutarnjeg kotača, a pritom pospješuje kočioni moment na vanjskom kotaču koji ga izgledno može izdržati. U modernije vrijeme ova prednost samokočnih diferencijala gubi na značaju jer kompromitira rad ABS-a (\textit{anti-lock braking system}.
+
+\begin{table}[ht]%hear, top, bottom page, nasuprot [h]
+\begin{tabularx}{\linewidth}{>{\parskip1ex}X@{\kern4\tabcolsep}>{\parskip1ex}X}
+\toprule
+\hfil\bfseries Prednosti
+&
+\hfil\bfseries Nedostaci
+\\\cmidrule(r{3\tabcolsep}){1-1}\cmidrule(l{-\tabcolsep}){2-2}
+
+%% PROS, seperated by empty line or \par
+Ne iziskuje održavanje, T-2 nije zahtjevan po pitanju maziva u kojem je potopljen što je praktično s obzirom na to da je smješten unutar same mjenjačke kutije.
+\par
+Konzistentno ponašanje diferencijala dozvoljava vozaču suvereno upravljanje automobilom bez neugodnih aberacija u njegovoj dinamici. Sustav je u potpunosti mehaničke prirode, ne postoji prilika da neadekvatna implementacija upravljanja dovede do kolizije između vozačevih očekivanja i stvarnog ponašanja diferencijala.
+\par
+Tih je i nezamjetan tokom svakodnevnog prometovanja.
+
+&
+
+%% CONS, seperated by empty line or \par
+Najčešće ne postoji način za prilagodbu \textit{TBR}-a i drugih karakteristika jednom proizvedenog diferencijala.
+\par
+Bez dodatnog konstrukcijskog rješenja ne reagira adekvatno u trenucima kada je jedan od pogonskih kotača van kontakta s podlogom.
+\par
+\textit{TBR} koji nudi T-2 najčešće nedostatan za najozbiljniju natjecateljsku primjenu.
+
+\\\bottomrule
+\end{tabularx}
+\caption{\textit{Specifične karakteristike Torsena relativno na druge tipove samokočnih diferencijala}}
+\label{tab2}
+\end{table}
+
+\begin{figure}[h]
+ \centering
+ \def\svgwidth{17cm}
+ \input{huch_1.pdf_tex}
+ \caption{\textit{Usporedba utjecaja otvorenog i Torsen diferencijala na} $\psi_\text{rel}$ \cite{huchtkotter1996LSD}}
+ \label{fig:huch}
+\end{figure} 
+
+\newpage
+	\subsection{Lamelni šperni diferencijal}
+		\subsubsection{Pasivni diferencijali}
+
+\begin{wrapfigure}{r}{0.4\textwidth}
+ \centering
+ \def\svgwidth{6,5cm}
+ \input{carlo_dif.pdf_tex}
+ \caption{\textit{Razdioba zakretnog momenta ovisno o lateralnoj akceleraciji kod lamelnog samokočnog diferencijala s konstantnim predopterećenjem}}
+ \label{fig:carlo}
+\end{wrapfigure}
+		
+Pasivni lamelni diferencijali često se još nazivaju Salisbury ili ZF-tip diferencijalima, a razlikuje se od otvorenog po tome što osovinice oko kojih rotiraju sateliti 2 i 4 nisu uležištene u samom kućištu diferencijala već između dvaju prstenova koji s njim zajedno rotiraju, ali su pritom aksijalno pomični.
+
+Dosjed prstenova na osovinicu satelita je oblikovan na način da prilikom prijenosa okretnog momenta (u jednom ili oba smjera) osovinica aksijalno razdvaja prstene koji pritom pritišću lamele smještene s obje strane diferencijala. Neke od lamela su grebenima spojene s poluosovinom, dok su neke spojene na kućište diferencijala. Na ovaj se način u trenutku kada je na diferencijal narinut zakretni moment djelomice priječi njegova kompenzacija, to jest zakretni se moment preusmjerava s kotača koji rotira brže na onaj koji rotira sporije. Kao i u slučaju Torsena, riječ je o diferencijalu osjetljivom na okretni moment, a istaknuti su strojni elementi predočeni na slici \ref{fig:salis}
+
+\begin{figure}[b]
+ \centering
+ \def\svgwidth{15cm}
+ \input{salisbury_shema.pdf_tex}
+ \caption{\textit{Interakcija osovinice satelita i potisnog prstena} \cite{2023basiclars}}
+ \label{fig:salis_s}
+\end{figure}
+
+Uzdužni utori osovinica na vanjskom obodu potisnih prstenova mogu biti oblikovani na različite načine. Oblik i smještaj utora definirati će \textit{TBR}, a također i opseg situacija u sklopu kojih moment neće biti simetrično raspoređen između kotača. U slučaju da su utori smješteni tek s jedne strane govorimo o samokočnom diferencijalu koji će svoju zadaću obavljati isključivo u fazi pogona, dok će se prilikom kočenja motora ponašati istovjetno otvorenom diferencijalu. Uvriježeno trgovačko nazivlje za ovakvo rješenje je \textit{1-way} diferencijal. Još su prisutni i \textit{1,5-way} te \textit{2-way} lamelni diferencijali koji, u različitim intenzitetima, također djeluju i za kočenja motorom.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{11cm}
+ \input{salisbury.pdf_tex}
+ \caption{\textit{Pregled elemenata različitih Salisbury samokočnih diferencijala} \cite{2023basiclars}}
+ \label{fig:salis}
+\end{figure}
+
+Moment $M_\text{S}$ narinut na kućište diferencijala na osovinici satelita transformira se u pogonsku silu $F_\text{S}$ shodno radijusu na kojem se njeno uležištenje nalazi relativno na os rotacije diferencijala. Slika \ref{fig:salis_s} shematski prikazuje razlaganje sile $F_\text{S}$ na normalnu komponentu dok se pritom do aksijalne komponente $F_\text{S,a}$ koja upravo i dovodi do samokočnosti dolazi sljedećim izrazom:
+%
+\begin{gather}
+F_\text{S,a}=\frac{M_\text{S}}{r_{1/3}}\cdot \frac{1}{\tan{\alpha}}
+\end{gather}
+
+Odabirom kuta uspona u utoru potisnih prstena može se dovesti do različitih vrijednosti kočnog broja diferencijala. Jednako tako će i izbor tipa i broja lamela uvjetovati samokočni moment za danu aksijalnu silu. Torsenov inherentni nedostatak u situacijama gdje jedan kotač gubi kontakt s podlogom kod lamelnog je diferencijala riješen primjenom tanjuraste opruge. Opruga nudi konstantno predopterećenje koje povećava kapacitet prianjanja u trenucima prije no što je diferencijal dostatno opterećen, odnosno prije no što je samokočni moment stvoren aksijalnim pritiskanjem paketa lamela. Zbog određenih nedostataka o kojima će više riječi biti unutar tablice \ref{tab3}, ovakvim je rješenjem do sada jedino Opel opremao svoje modele športskih kompakata; preciznije Corsu D OPC Nürburgring Edition i Astru K OPC.
+
+\begin{table}[ht    ]%hear, top, bottom page, nasuprot [h]
+\begin{tabularx}{\linewidth}{>{\parskip1ex}X@{\kern4\tabcolsep}>{\parskip1ex}X}
+\toprule
+\hfil\bfseries Prednosti
+&
+\hfil\bfseries Nedostaci
+\\\cmidrule(r{3\tabcolsep}){1-1}\cmidrule(l{-\tabcolsep}){2-2}
+
+%% PROS, seperated by empty line or \par
+Dozvoljava postizanje kočnih brojeva viših no u slučaju Torsena T-2.\par
+Jednostavnom primjenom tanjuraste opruge moguće omogućiti samokočnost čak i prilikom podizanja jednog od kotača u zrak.
+\par
+Oprugom koja rasterećuje lamele moguće je osigurati ponašanje ekvivalentno otvorenom diferencijalu pri malim narinutim momentima $M_\text{S}$ čime se umanjuje podupravljivost vozila.
+\par 
+Izmjenom broja ili tipa lamela te primijenjenih tanjurastih opruga moguće je aktivno podešavati karakteristike diferencijala.
+
+&
+
+%% CONS, seperated by empty line or \par
+Zahtjeva održavanje, a paket lamela ima ograničen životni vijek.\par
+Postoji tendencija promijeni karakteristika diferencijala s povećanjem kilometraže vozila kako se lamele unutar diferencijala troše.
+\par 
+Inferiorna NVH svojstva Torsen diferencijalu, pogotovo u slučaju primjene tanjuraste opruge za predopterećenje.
+\par 
+Potencijal za pojavljivanjem \textit{stick and slip} ponašanja gdje dolazi do vibracija uslijed brzih oscilacija između rada u području trenja klizanja i rada u području statičkog trenja.
+\par 
+Za adekvatne performanse diferencijala, ulje mjenjača se mora miješati s posebnim aditivima.
+
+\\\bottomrule
+\end{tabularx}
+\caption{\textit{Specifične karakteristike Salisbury diferencijala relativno na druge tipove samokočnih diferencijala}}
+\label{tab3}
+\end{table} 
+
+Na slici \ref{fig7:a} uspoređeno je ponašanje otvorenog diferencijala, krutog pogonskog vratila (na engleskom \textit{spool}) te klasičnog lamelnog diferencijala bez tanjuraste opruge. U slučaju \ref{fig7:b} riječ je o lamelnom diferencijalu s predopterećenjem dok je po pitanju \ref{fig7:c} prikazan diferencijal čija opruga sprečava nastajanje samokočnog momenta ispod određenog praga momenta $M_\text{S}$. Moguće radne točke istaknutih diferencijala nalaze se unutar područja opisanog specifičnim marginama. Slika \ref{ara} prikazuje pak agregat svih radnih točaka lamelnog diferencijala s predopterećenjem tokom natjecateljske vožnje stazom. Fiksno predopterećenje opruge ovdje je 400 Nm što je i jasno kada se primijeti da se u tom režimu diferencijal ponaša poput \textit{spoola}.
+
+\begin{figure}[!h] 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \def\svgwidth{8cm}
+ \input{englet_1.pdf_tex}
+ \caption{\textit{}}
+    \label{fig7:a} 
+    \vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \def\svgwidth{8cm}
+ \input{englet_3.pdf_tex}
+ \caption{\textit{}}
+    \label{fig7:b} 
+    \vspace{4ex}
+  \end{subfigure} 
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \def\svgwidth{8cm}
+ \input{englet_2.pdf_tex}
+ \caption{\textit{}}
+    \label{fig7:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+     \def\svgwidth{6,95cm}
+ \input{englet_4.pdf_tex}
+ \caption{\textit{}}
+ 	\label{ara}
+\end{subfigure}
+  \caption{\textit{Raspodjela momenta između kotača za različite diferencijale} \cite{englet1}}
+  \label{fig7} 
+\end{figure}
+
+	\subsubsection{Aktivni diferencijali - \textit{BorgWarner} FXD i \textit{Hyundai} \textit{Wia} e-LSD}
+
+Tvrtka \textit{BorgWarner} je za \textit{Volkswagen AG} 2013. razvila FXD (\textit{front cross differential)} prednji diferencijal koji je tržištu predstavljen u sklopu \textit{Performance Pack} opcije za tada novi Golf GTI sedme generacije. VW se na FXD u svojoj internoj nomenklaturi referirao sa VAQ, akronim koji označava \textit{Vorderachsquersperre}. Hyundai je $2017.$ na tržište izašao s vlastitim rješenjem e-LSD-a kojeg je projektirala njihova podružnica za prijenosnike \textit{Hyundai} \textit{Wia}. Rješenje je izvedbeno analogno \textit{BorgWarnerovom} uz vlastito upravljanje stoga će kroz sljedećih nekoliko paragrafa dovoljno biti iscrtati fundamentalne aspekte FXD sustava.
+
+\begin{figure}[ht]
+ \centering
+ \def\svgwidth{15cm}
+ \input{FXD.pdf_tex}
+ \caption{\textit{Momenti i brzine vrtnje FXD diferencijala u yz ravnini s pogledom u smjeru osi x} \cite{2023basiclars}}
+ \label{fig:fxd}
+\end{figure} 
+
+FXD je smješten na desnom pogonskom vratilu, to jest poluosovini, te vrši ulogu sučelja između vratila i kućišta diferencijala s kojim je spojen žlijebovima. Kroz njegovo šuplje vratilo prostire se sama poluosovina. Lamelne ploče s unutarnjim uzubljenjem vezane su za poluosovinu, dok su one s vanjskim učvršćene na šuplje vratilo koje je čvrsto vezano za kućište diferencijala. U trenutku kada upravljačka jedinica to odluči, pumpa će narinuti tlak na poseban klip koji će aksijalno potisnuti paket lamela i ostvariti moment trenja između poluosovine i kućišta diferencijala. Moment trenja će nastojati ubrzati sporije rotirajuću komponentu, a usporiti onu koja se vrti brže \cite{2023basiclars}. Sklop FXD-a vidljiv je na slici \ref{fig:latslik}.
+
+Na slici \ref{fig:fxd} prikazana su dva slučaja djelovanja FXD diferencijala. U slučaju a) desni se kotač vrti brže od lijevog, to jest vrijedi $\omega_1<\omega_3$. Aksijalnim djelovanjem klipa na paket lamela dio momenta narinutog na desnu poluosovinu je vraćen natrag na kućište diferencijala, odnosno na nosač S. Taj se samokočni moment naziva $M_\text{FXD}$, a zbog prirode stožastog otvorenog diferencijala, ravnomjerno će se rasporediti između kotača.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{13cm}
+ \input{lateralno_FXD.pdf_tex}
+ \caption{\textit{Upravljano ponašanje FXD diferencijala u zavoju} \cite{2023basiclars}}
+ \label{fig:latslik}
+\end{figure}  
+
+U slučaju b) vrijedi obrnuto te je lijevi je kotač brži od desnog. Kućište diferencijala kao što je dokazano u jednadžbi (\ref{kinjeddif}) vrti brzinom koja je aritmetička sredina brzine vrtnje dvaju poluosovina. Djelovanjem paketa lamela na kućište diferencijala djelovati će moment kočenja, a isti taj moment biti će narinut na desno vratilo u smjeru njegove vrtnje. U ovom se scenariju se samokočni moment $M_\text{FXD}$ ne distribuira putem diferencijala već direktno djeluje na desnu poluosovinu. Ponašanje FXD diferencijala za oba slučaja može se prikazati izrazima \cite{2023basiclars}:
+%
+\begin{gather}
+M_1=\frac{M_\text{S}+M_\text{FXD}\cdot \text{sgn}(\omega_3-\omega_1)}{2}\\
+M_3=\frac{M_\text{S}-M_\text{FXD}\cdot \text{sgn}(\omega_3-\omega_1)}{2}
+\end{gather}
+%
+
+Zbog same prirode svoje konstrukcije, FXD može prenijeti zakretni moment isključivo s kotača koji se okreće većom brzinom na kotač koji se okreće manjom brzinom. Kroz zavoj se vanjski kotač okreće brže no unutarnji. U takvim bi se situacijama aktivacijom diferencijala inducirao moment podupravljanja na vozilo, no aktivna upravljačka jedinica to izbjegava. U slučaju da narinuti moment na kotače savlada prianjanje unutarnjeg kotača koji je uslijed bočnog ubrzanja rasterećen, tada bi njegova brzina vrtnje nadmašila onu vanjskog te bi FXD preusmjerio dio zakretnog momenta na vanjski kotač; na taj način smanjio tendenciju vozila prema podupravljanju. Način na koji VW upravlja djelovanjem diferencijala prikazan je na slici \ref{fig:latslik}.
+
+Prilikom kočenja motorom aktivacijom diferencijala kreirao bi se \textit{yaw} moment koji se ponovno opire podupravljanju. FXD je opremljen i posebnim \textit{yaw damping} modulom koji mjeri \textit{yaw rate} vozila te u slučaju da zaključi kako je količina preupravljanja s kojom se vozač suočava prekomjerna, aktivacijom diferencijala može stvoriti stabilizirajući moment na vozilo. Kod kočenja kroz zavoj pak moment koji kočnice savladavaju uslijed usporavanja zagonskih masa prijenosa i motora bio bi intenzivniji na unutarnjem kotaču. Kako je unutarnji kotač rasterećen djelovanjem diferencijala bi se mogli smanjiti izgledi njegovog blokiranja. Povrh toga, iznos za koji je kočni moment reduciran na unutarnjem kotaču pojavio bi se na vanjskom te na ovaj način primjenom samokočnog diferencijala možemo govoriti o preraspodjeli kočione sile koja odgovara dinamičkom opterećenju na kotačima u danom trenutku. Kako ne bi došlo do kolizije s ABS sustavom, aktivacija FXD diferencijala tokom kočenja se mahom zaobilazi. Kod malih brzina prisutno je predopterećenje lamelnog paketa koje je ovisno o poziciji papučice gasa. Na ovaj se način osigurava optimalno prianjanje prilikom kretanja vozilom neovisno o možebitnim odstupanjima u kvaliteti podloge između kotača.
+
+FXD također otvara blokadu u trenucima kada postoji rizik da moment savlada i vanjski kotač jer bi se, kao što je opisano ranije za Torsen diferencijal, time ugrozila sposobnost vanjske gume da lateralno vodi vozilo. Takav stupanj kontrole moguć je jedino s upravljanim sustavom.
+
+FXD je posebice atraktivan proizvođačima iz nekoliko razloga:
+\begin{itemize}
+\item ne dijeli ulje s ostatkom prijenosa što omogućuje da mazivo za mjenjač i FXD budu odabrani upravo za tu specifičnu namjenu
+\item moguće je zadržati postojeće komponente diferencijala jer se funkcija FXD-a odnosi tek na ograničavanje proklizavanja, dok sve ostale zadaće i dalje ispunjava postojeći otvoreni diferencijal
+\item dozvoljava aktivno upravljanje stoga je samokočni moment moguće koristiti tada kada je to oportuno, a u ostalim scenarijima diferencijal držati otvorenim.
+\end{itemize}
+
+\begin{figure}
+ \centering
+ \def\svgwidth{13cm}
+ \input{FXD_teh.pdf_tex}
+ \caption{\textit{Osnovne komponente sklopa FXD diferencijala} \cite{VW}}
+ \label{fig:slikica}
+\end{figure} 
+
+\subsubsection{Aktivni \textit{torque vectoring} diferencijali}
+
+Zajednički nazivnik svim do sada opisanim samokočnim diferencijalima je činjenica da se transport zakretnog momenta može odvijati isključivo sa kotača koji se vrti većom brzinom na kotač koji se vrti manjom brzinom. U tom se slučaju pogonski zakretni moment može raspodijeliti na način koji pospješuje \textit{yaw rate} vozila tek kada prednji unutarnji kotač inicijalno prokliže te nadmaši vanjski u svojoj brzini vrtnje. U bržim zavojima, gdje vozilo zbog višeg odabranog stupnja prijenosa i pripadajuće manje multiplikacije okretnog momenta nije u prilici savladati prianjanje na unutarnjem kotaču, samokočni će diferencijal inducirati podupravljanje.
+
+Aktivni \textit{torque vectoring} diferencijali (TVD) imaju za cilj sanirati opisane nedostatke. Njihova je primjena razmjerno uvriježena u kontekstu stražnjih pogonskih osovina, kako vozila sa stražnjim pogonom, tako i onih sa pogonom na svim kotačima. \textit{Getrag}, danas pod okriljem \textit{Magna Powertraina}, još je $2009.$ imao radni prototip Mini Coopera S R53 generacije s dvama različitim koncepcijama prednjih aktivnih diferencijala. 
+
+\textit{Schnellster} je ugradbeno analogan \textit{BorgWarnerovom} FXD-u gdje se dodatne komponente i sklopovlje nalaze s desne strane mjenjačke kutije, a pritom je zadržan postojeći otvoreni diferencijal s kojim je vozilo serijski opremljeno. Umjesto jednostavnog povezivanja desne poluosovine sa kućištem diferencijala putem tarnih spojki u ovom slučaju se sve zasniva na posebnom planetarnom prijenosniku čiji je satelit izveden u tri različita stupnja. Prvi stupanj je uzubljen sa sunčanikom koji je vezan za nosač diferencijala, drugi pak sa sunčanikom žlijebovima čvrsto vezanim za poluosovinu, dok je treći stupanj vezan za posljedni sunčanik koji se spojkom može kočiti o statično kućište \textit{Schnellstera}. Svi su sunčanici prošupljeni jer se kroz njih pruža desna poluosovina vozila. Sam kavez koji na sebi nosi satelite slobodno rotira no s lijeve strane, putem dodatne tarne spojke, također može biti kočen o nepomično kućište. Kada se vozilo kreće pravocrtno kavez sinkrono rotira sa poluosovinama.
+
+Kada bi se kočila spojka između kaveza i kućišta planeti bi krenuli sa svojom rotacijom, a pritom bi se desni kotač krenuo ubrzavati zbog većeg kinematskog radijusa satelita na sučelju s poluosovinom nego na sučelju sa sunčanikom vezanim za okvir diferencijala. Ovakvo upravljanje dovodi do aktivnog \textit{yaw} momenta u prolasku kroz lijevi zavoj.
+
+Ako bi se pak kočio sunčanik uzubljen za treći stupanj na satelitu, zbog kinematskog bi se odnosa krenuo ubrzavati diferencijal na uštrb desne poluosovine pa bi zakretni moment bio preusmjeren na lijevi kotač. Vozilo u ovom slučaju pospješeno savladava desni zavoj.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{11,2cm}
+ \input{schnellster.pdf_tex}
+ \caption{\textit{Shema Schnellster torque vectoring diferencijala} \cite{getrag}}
+ \label{fig:schnee}
+\end{figure}
+
+\textit{Twinster+} nije srodan u svojoj konstrukciji ni jednom do sada predstavljenom konceptu samokočnog diferencijala. Svaka od poluosovina dobiva svoju vlastitu mokru lamelnu spojku kojom se može sinkronizirati s vrtnjom kućišta koje je vezano za završni prijenos. Na ovaj se način može u potpunosti zaobići otvoreni diferencijal i spojka čiju ulogu će odigrati spojke pojedinih poluosovina. Pritom je moguće anulirati veliki dio dodane mase te se približiti težini serijskog vozila. Posebnost ovakvog rješenja je i konceptualna; gdje su do sada svi samokočni diferencijali bili primarno podređeni diferencijaciji brzina između kotača uz simetričnu preraspodjelu zakretnog momenta, a tek pomoćnim mehanizmom dozvoljavali njegov prijenos između kotača, \textit{Twinster+} u jednostavnom položaju s uključenim objema spojkama djeluje kao \textit{spool} te upućuje i do 100\% zakretnog momenta na tek jedan od kotača. Nominalna funkcija klasičnog otvorenog diferencijala postiže se tek aktivnim upravljanjem aksijalnih sila uključivanja na pojedinim paketima lamela.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{11,2cm}
+ \input{twinster.pdf_tex}
+ \caption{\textit{Shema Twinster+ torque vectoring diferencijala} \cite{getrag}}
+ \label{fig:twin}
+\end{figure} 
+
+Osnovna je prednost aktivnih \textit{torque vectoring} diferencijala u činjenici da je za pojedino lateralno ubrzanje moguće postići savršen raspored okretnog momenta između kotača. Pogonska će sila na pojedinom kotaču odgovarati onoj najvećoj dozvoljenoj u sklopu kruga, to jest elipse trenja, za danu silu prianjanja u poprečnom smjeru. Pritom će se oba kotača okretati brzinom koja odgovara optimalnom faktoru klizanja kotača $\lambda$. Povrh toga, dok kod konvencionalnih samokočnih diferencijala tek agresivni vozači mogu iskusiti benefite takvog rješenja, prednosti su TVD-a opipljive i najdefanzivnijim vozačima i to pri prolasku zavoja uz minimalnu lateralnu akceleraciju.
+
+Usprkos svim istaknutim prednostima, aktivni se \textit{torque vectoring} diferencijali do sada nisu pojavljivali kao dio opreme serijskih vozila s prednjim pogonom. Opisano bi se moglo promijeniti u skorašnjoj budućnosti; \textit{Getragov} odjel za razvoj završnih prijenosa prodan je \textit{GKN-u} $2011.$ godine, a \textit{Twinster+} je uz pojedine prilagodbe za električni pogon 2019. predstavljen kao \textit{eTwinster} te bi uskoro mogao biti dio opreme u sklopu klase športskih električnih vozila.
+
+\section{Zaključak i usporedba iscrtanih rješenja prednjih diferencijala}
+
+Samokočni diferencijali su tehnološko rješenje koje je stasalu u sklopu autosporta, a u novije vrijeme njihova je primjena dovoljno raširena i kao pogonsko rješenje za snažnije cestovne automobile s pogonom na prednje kotače. 
+
+Svaka od opisanih izvedenica samokočnog diferencijala nudi specifičan set prednosti i mana relativno na konvencionalni otvoreni diferencijal. Torsen se nalaže kao idealan kompromis između adekvatnih performansi, prihvatljive cijene, umjerene kompleksnosti te ponajprije bezbrižne eksploatacije uz dug životni vijek te minimalnu zahtjevnost u održavanju. 
+
+Kamen spoticanja aktivnih diferencijala vjerojatno je vezan uz njihov utjecaj na osjećaj u upravljaču jednako koliko i uz njihovu višu cijenu. Kombinacijom pasivnih i aktivnih metoda sanacije \textit{torque steera} te povećanjem efikasnosti u kalibraciji takvih kompleksnih sustava na pojedino vozilo može se očekivati njihova pojava u klasi električnih vozila u bližoj budućnosti. Kvalitativna ocjena opisanih diferencijala može se pronaći na tablici niže;
+
+
+
+\begin{table}[hb]
+	\centering
+	\begin{tabular}{lccccc}
+	\toprule
+		 & otvoreni & Torsen & lamelni & FXD & TVD\\
+		\midrule
+		 $\mu -split$ ubrzanje & $--$ & o & + & ++ & ++\\
+		 jedan kotač u zraku & $--$ & $-$ & o & + & ++\\
+		 ubrzanje uz lateralno opterećenje & $-$ & + & + & + & +\\
+		mogućnost podešavanja & $--$ & $-$ & + & ++ & ++\\
+		vijek trajanja & ++ & ++ & $-$ & $-$ & $-$\\
+		održavanje & ++ & ++ & o & o & o\\
+		cijena & ++ & o & o & + & $- -$\\
+		jednostavnost implementacije & ++ & + & + & + & $-$\\
+		osjećaj u upravljaču & ++ & $--$ & $--$ & $-$ & $-$\\
+		vršni kočni broj & $--$ & ++ & ++ & + & ++\\
+		podupravljanje pri kočenju motorom & + & $-$ & $-$ & + & ++\\
+		podupravljanje pri niskim pogonskim silama & o & $-$ & $-$ & o & ++\\
+		podupravljanje kod prevelike pogonske sile & ++ & $-$ & $-$ & + & +\\
+		\bottomrule
+	\end{tabular}
+	\caption{\textit{Kvalitativna ocjena mogućih rješenja prednjih diferencijala u pojedinim kategorijama}}
+	\label{tab4}
+\end{table}
+\newpage
+%\begin{figure}[!h] 
+%  \begin{subfigure}[b]{0.5\linewidth}
+%    \centering
+%    \def\svgwidth{8cm}
+% \input{englet_1.pdf_tex}
+% \caption{\textit{}}
+%    \label{fig7:a} 
+%    \vspace{4ex}
+%  \end{subfigure}%% 
+%  \begin{subfigure}[b]{0.5\linewidth}
+%    \centering
+%    \def\svgwidth{8cm}
+% \input{englet_3.pdf_tex}
+% \caption{\textit{}}
+%    \label{fig7:b} 
+%    \vspace{4ex}
+%  \end{subfigure} 
+%  \begin{subfigure}[b]{0.5\linewidth}
+%    \centering
+%    \def\svgwidth{8cm}
+% \input{englet_2.pdf_tex}
+% \caption{\textit{}}
+%    \label{fig7:c} 
+%  \end{subfigure}%%
+%  \begin{subfigure}[b]{0.5\linewidth}
+%    \centering
+%     \def\svgwidth{6,95cm}
+% \input{englet_4.pdf_tex}
+% \caption{\textit{}}
+% 	\label{ara}
+%\end{subfigure}
+%  \caption{\textit{Raspodjela momenta između kotača za različite diferencijale} \cite{englet1}}
+%  \label{fig7} 
+%\end{figure}
+
+%Reference symbols: $\gls{v}$, $\gls{va}$, $\gls{t}$, \gls{kv} and $\gls{alpha}$. Povrh toga; \gls{s}
+\newpage
+\addcontentsline{toc}{section}{Literatura}
+\emergencystretch=1em%spasilo mi je overfllow koji se događao s VW URL-om
+\printbibliography
+
+\end{document}
+
